@@ -1,0 +1,14 @@
+{% extends "base.html" %} 
+{% block content %} 
+
+
+ <img src="{{MEDIA_URL}}{{product.image}}" alt="">
+ <p>€{{product.price}}</p>
+</p>{{product.name}}</p>
+<p>{{product.brand}}</p>
+</p>{{product.sku}}</p>
+</p>{{product.description}}</p>
+</p>{{product.stock}}</p>
+
+
+{% endblock content %}

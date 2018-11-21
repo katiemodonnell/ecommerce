@@ -4,3 +4,5 @@ def items_in_cart(request):
     for product, quantity in cart.items():
         count += quantity
     return{'items_in_cart': count}
+    
+    

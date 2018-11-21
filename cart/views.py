@@ -22,9 +22,12 @@ def view_cart(request):
     
     
     cart_items = []
+
+    
     for product_id, quantity in cart.items():
         product = get_object_or_404(Product, pk=product_id)
-    
+        count = 0
+        
         cart_items.append({
             'id': product.id,
             'name': product.name,
@@ -35,7 +38,24 @@ def view_cart(request):
             'price': product.price,
             'stock': product.stock,
             'quantity': quantity,
-            'total': product.price * quantity
+            'total': product.price * quantity,
+          
         })    
+        
+    cart_total =0
+    for item in cart_items:
+        cart_total += item['total']
     
-    return render(request, "cart/view_cart.html", {'cart_items': cart_items})
+    return render(request, "cart/view_cart.html", {'cart_items': cart_items, 'count': count, 'cart_total': cart_total})
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    

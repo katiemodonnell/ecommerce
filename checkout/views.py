@@ -1,16 +1,14 @@
 from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
 from products.models import Product
-import json
+from .forms import MakePaymentForm, OrderForm
 
 # Create your views here.
 
 def checkout(request):
     cart = request.session.get('cart', {})
-    
-    
+
     cart_items = []
 
-    
     for product_id, quantity in cart.items():
         product = get_object_or_404(Product, pk=product_id)
        
@@ -33,7 +31,13 @@ def checkout(request):
     for item in cart_items:
         cart_total += item['total']
     
-    return render(request, "checkout/checkout.html", {'cart_items': cart_items, 'cart_total': cart_total})
+    
+    form = MakePaymentForm()
+    form_order = OrderForm()
+    
+    
+    
+    return render(request, "checkout/checkout.html", {'cart_items': cart_items, 'cart_total': cart_total, 'payment_form': form, 'order_form': form_order})
     
     
     

@@ -1,8 +1,5 @@
 {% extends 'base.html' %} {% block content %}
 
-
-
-{% if items_in_cart > 0 %}
 <table class="table">
     <thead>
         <tr>
@@ -11,7 +8,7 @@
             <th>Quantity</th>
             <th>Price</th>
             <th>Total</th>
-            <th></th>
+
         </tr>
     </thead>
     <tbody>
@@ -23,16 +20,6 @@
             <td>{{ item.quantity }}</td>
             <td>€{{ item.price }}</td>
             <td>€{{ item.total }}</td>
-            <td>
-
-
-                <form method="POST" action="{% url 'remove_from_cart' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="product" value="{{ item.id }}"/>
-                    <input class="btn btn-primary" type="submit" value="Remove" />
-                </form>
-
-            </td>
         </tr>
         {% endfor %}
         <tr>
@@ -40,23 +27,12 @@
             <td></td>
             <td></td>
             <td><strong>Total:</strong></td>
-            <td><strong>
-          
-        <label class="badge badge-light">{{ cart_total }}</label> 
-
-
-</strong></td>
-            <td></td>
+            <td>
+                <strong><label class="badge badge-light">{{ cart_total }}</label> </strong></td>
+           
         </tr>
     </tbody>
 </table>
 
-
-<a href="{% url 'checkout' %}" class="btn btn-success" role="button">Checkout</a>
-
-{% else %}
-          <td><strong>You cart is empty</strong></td>
-
-{% endif %}
 
 {% endblock %}

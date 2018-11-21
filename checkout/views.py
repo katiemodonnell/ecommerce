@@ -4,20 +4,7 @@ import json
 
 # Create your views here.
 
-def add_to_cart(request):
-    product_id = request.POST['product']
-    quantity = int(request.POST['quantity'])
-    
-    
-    cart = request.session.get('cart',{})
-    cart[product_id] = cart.get(product_id, 0) + quantity
-    request.session['cart'] = cart
-    
-    return redirect("/")
-
-
-
-def view_cart(request):
+def checkout(request):
     cart = request.session.get('cart', {})
     
     
@@ -46,23 +33,7 @@ def view_cart(request):
     for item in cart_items:
         cart_total += item['total']
     
-    return render(request, "cart/view_cart.html", {'cart_items': cart_items, 'cart_total': cart_total})
-    
-    
-def remove_from_cart(request):
-    product_id = request.POST['product']
-    
-    cart = request.session.get('cart', {})
-    del cart[product_id]
-    request.session['cart'] = cart
-    
-    return redirect("/cart/view/")
-    
-
-    
-    
-    
-    
+    return render(request, "checkout/checkout.html", {'cart_items': cart_items, 'cart_total': cart_total})
     
     
     

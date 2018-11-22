@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
 from products.models import Product
 from .forms import MakePaymentForm, OrderForm
+from .models import OrderLineItem
+from django.conf import settings
+from django.contrib import messages
+import stripe
 
-# Create your views here.
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
-def checkout(request):
-    cart = request.session.get('cart', {})
-
+def get_cart_items_and_total(cart):
     cart_items = []
+    cart_total = 0
 
     for product_id, quantity in cart.items():
         product = get_object_or_404(Product, pk=product_id)
@@ -30,14 +33,80 @@ def checkout(request):
     cart_total =0
     for item in cart_items:
         cart_total += item['total']
+        
+        
+    return {'cart_items': cart_items, 'cart_total': cart_total }
+        
+        
+        
     
-    
+
+# Create your views here.
+
+def checkout(request):
+       
+    cart = request.session.get('cart', {})
+    cart_items_and_total = get_cart_items_and_total(cart)
+
     form = MakePaymentForm()
     form_order = OrderForm()
     
+    context = {'payment_form': form, 'order_form': form_order, 'publishable': settings.STRIPE_PUBLISHABLE_KEY}
+    context.update(cart_items_and_total)
+    
+    return render(request, "checkout/checkout.html", context )
     
     
-    return render(request, "checkout/checkout.html", {'cart_items': cart_items, 'cart_total': cart_total, 'payment_form': form, 'order_form': form_order})
+
+def submit_payment(request):
     
+    cart = request.session.get('cart', {})
+    cart_items_and_total = get_cart_items_and_total(cart)
     
-    
+    payment_form = MakePaymentForm(request.POST)
+    order_form = OrderForm(request.POST)
+        
+    if order_form.is_valid and payment_form.is_valid():
+        
+        #Save the order to the database
+        order = order_form.save()
+        cart = request.session.get('cart', {})
+        for product_id, quantity in cart.items():
+            line_item = OrderLineItem()
+            line_item.product_id = product_id
+            line_item.quantity = quantity
+            line_item.order = order
+            line_item.save()
+            
+        
+        # Grab the money and run
+        
+        total = cart_items_and_total['cart_total']
+        stripe_token=payment_form.cleaned_data['stripe_id']
+
+        try:
+
+            total_in_cent = int(total*100)
+            customer = stripe.Charge.create(
+                amount=total_in_cent,
+                currency="EUR",
+                description="Dummy Transaction",
+                card=stripe_token,
+            )
+
+        except stripe.error.CardError:
+            print("Declined")
+            messages.error(request, "Your card was declined!")
+
+        if customer.paid:
+            print("Paid")
+            messages.error(request, "You have successfully paid")
+
+
+        
+        
+        #clear the cart
+        del request.session['cart']
+        
+        #Redirect to home
+        return redirect("/")

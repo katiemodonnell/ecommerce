@@ -99,7 +99,8 @@ def submit_payment(request):
             messages.error(request, "Your card was declined!")
 
         if customer.paid:
-            print("Paid")
+            name = "kate"
+            print("Paid %S" % name)
             messages.error(request, "You have successfully paid")
 
 
